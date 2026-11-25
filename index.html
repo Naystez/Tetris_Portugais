@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blocos de Portugal</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;color:#fff7dc;background:#101f1a}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(ellipse at top,#234c38,transparent 65%),#101f1a;min-height:100dvh} main{max-width:480px;margin:auto;padding:14px 14px 20px}
+header{text-align:center;margin-bottom:12px} h1{font:700 clamp(30px,7vw,46px) Georgia;margin:3px 0;color:#ffdc81} header p{margin:0;color:#f1e7ce}
+.game{display:grid;grid-template-columns:minmax(0,1fr) 94px;gap:10px;max-width:calc(112px + min(31dvh, 280px));margin:auto}
+.well{position:relative;outline:2px solid #bd9250;outline-offset:-1px;border-radius:10px;overflow:hidden;background:#0c1714}
+#board{display:block;width:100%;aspect-ratio:1/2}
+.overlay{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:8px;background:#0b1814db}.overlay[hidden]{display:none}
+h2{font:700 23px Georgia;margin:0 0 12px}
+aside{display:grid;align-content:start;gap:7px} .tile{background:#1a3026;border:1px solid #52765c;border-radius:8px;padding:5px 8px}
+small{display:block;color:#f0d9a0;font-size:11px} strong{font-size:19px;font-variant-numeric:tabular-nums} #next{display:block;width:100%;max-height:50px}
+button{font:inherit;font-weight:700;color:#fff7dc;background:#285640;border:1px solid #638b70;border-radius:8px;min-height:44px;cursor:pointer;touch-action:manipulation} button:active{background:#417052} button:focus-visible{outline:3px solid #ffdc81;outline-offset:2px} button:disabled{opacity:.55}
+#start{background:#a02c39;border-color:#e47c80;padding:0 15px}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:13px auto 0;max-width:380px}
+.controls button{font-size:21px;line-height:1;padding:6px 1px}.controls span{display:block;font-size:10px;margin-top:4px}
+.help{text-align:center;color:#eedebd;font-size:12px;margin:9px 0 0}
+@media(max-height:650px){main{padding-top:7px}header{margin-bottom:8px}aside{gap:4px}.tile{padding:2px 7px}strong{font-size:17px}#next{max-height:36px}}
+
+/* Azulejos, calçada et couleurs du Portugal */
+body{background:radial-gradient(ellipse at 20% 0,#21654688,transparent 55%),radial-gradient(ellipse at 100% 60%,#a5263844,transparent 60%),#071d23}
+body:before{content:"";position:fixed;inset:0;z-index:-1;opacity:.12;background:repeating-conic-gradient(from 45deg,#a4d6e3 0 25%,transparent 0 50%) 0 0/48px 48px}
+main{max-width:520px;padding-top:12px}header{position:relative}
+header:before{content:"";display:block;height:5px;border-radius:9px;background:linear-gradient(90deg,#238550 40%,#ef4455 40%);margin-bottom:10px}
+h1{font-style:italic;text-shadow:0 3px 22px #ffce6950}
+header p{font-size:13px}
+.scene{height:58px;margin:8px auto 11px;position:relative;overflow:hidden;border-bottom:7px solid #e7d9bc;background:linear-gradient(transparent 20%,#52a7bd18)}
+.houses{position:absolute;bottom:0;left:0;right:0;display:flex;align-items:end;justify-content:space-around;gap:5px}
+.house{width:38px;height:33px;background:#e3b067;border-top:5px solid #c76545;box-shadow:inset 0 0 0 2px #f9eac94d}
+.house:nth-child(2n){height:44px;background:#d7827b}.house:nth-child(3n){height:28px;background:#91c4c1}
+.house:after{content:"▪ ▪";display:block;text-align:center;color:#243e54;font-size:18px;line-height:22px}
+.tram{position:absolute;bottom:-2px;left:0;font-size:38px;filter:drop-shadow(0 2px 2px #0008);animation:lisboa 18s linear infinite}
+@keyframes lisboa{from{transform:translateX(-65px)}to{transform:translateX(510px)}}
+.game{max-width:calc(107px + min(29dvh,270px));gap:11px}
+.well{border:5px solid #f3e6cb;outline:2px solid #4e99b7;box-shadow:0 0 0 5px #1a5770,0 16px 40px #0006;border-radius:4px;background:#0c2027}
+.tile{border:1px solid #64969d66;background:linear-gradient(135deg,#174454,#12332f);box-shadow:inset 0 1px #ffffff15}
+small{color:#d7e5df}strong{color:#ffdb86}
+.overlay{background:linear-gradient(#08252cee,#153d32ed);padding:12px}
+.overlay:before{content:"🇵🇹";font-size:40px;display:block;animation:float 3s ease-in-out infinite}
+.overlay h2{color:#ffe3a3;line-height:1.2}
+@keyframes float{50%{transform:translateY(-6px) rotate(-5deg)}}
+#start{background:linear-gradient(120deg,#b73243,#d14752);box-shadow:0 5px 0 #721e2a}
+.controls button{background:linear-gradient(#23634f,#174838);border-color:#75a382;box-shadow:0 3px 0 #071c17;min-height:52px}
+.controls button[data-action="rotate"]{background:linear-gradient(#aa3b47,#772732);border-color:#dc7f84}
+.controls button[data-action="drop"]{background:linear-gradient(#ac7b2a,#80571b);border-color:#d6ae61}
+.controls button:active{transform:translateY(2px);box-shadow:none}
+.postcard{max-width:390px;margin:12px auto 0;text-align:center;min-height:35px;color:#f3dfab;font:italic 15px Georgia}
+.postcard b{display:block;font:11px system-ui;color:#a5c9c5;margin-top:4px}
+.souvenirs{display:flex;justify-content:center;gap:17px;font-size:23px;margin-top:8px}
+.souvenirs span{display:inline-block;animation:float 4s ease-in-out infinite}.souvenirs span:nth-child(even){animation-delay:-2s}
+.toast{position:absolute;top:33%;left:4%;right:4%;text-align:center;font:bold 24px Georgia;color:#fff1b8;pointer-events:none;opacity:0;z-index:3;text-shadow:0 2px 5px #000,0 0 15px #213a28}
+.toast.show{animation:celebrate 1.5s ease-out both}
+.toast small{font:13px system-ui;margin-top:7px;color:white}
+@keyframes celebrate{0%{opacity:0;transform:translateY(18px) scale(.65)}20%,65%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-24px) scale(1.08)}}
+.well.impact{animation:impact .22s ease-out}.well.levelup{animation:glow .8s ease-out}
+@keyframes impact{40%{transform:translateY(3px)}}
+@keyframes glow{40%{box-shadow:0 0 0 5px #e8c571,0 0 48px #ffcc69}}
+@media(max-height:740px){.scene{height:39px;margin:5px auto 8px}.souvenirs{display:none}.postcard{margin-top:9px}header:before{margin-bottom:4px}h1{font-size:30px}.help{font-size:10px}.game{max-width:calc(107px + min(27dvh,270px))}}
+@media(prefers-reduced-motion:reduce){*,*:before{animation:none!important}.toast.show{opacity:1}}
+
+/* Espace de jeu et commandes accessibles au pouce */
+main{max-width:520px;padding:8px 14px max(12px,env(safe-area-inset-bottom))}
+header{margin-bottom:5px}header:before{margin-bottom:5px}h1{font-size:clamp(27px,7vw,36px);margin:0}header p{font-size:12px}
+.scene{height:28px;margin:4px auto 9px;max-width:420px;border-bottom-width:4px}
+.tram{font-size:29px}.house{height:23px}.house:nth-child(2n){height:28px}
+.game{display:flex;flex-direction:column;max-width:420px;gap:10px}
+aside{order:-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 56px 51px;gap:4px;align-items:stretch}
+.tile{padding:4px 5px;border-radius:7px;text-align:center}small{font-size:10px}strong{font-size:18px}
+#next{height:30px;max-height:30px;object-fit:contain}#pause{font-size:11px;padding:2px;overflow-wrap:anywhere}
+.well{width:min(100%,calc((100dvh - 263px)/2));min-width:156px;align-self:center;border-width:3px}
+.controls{max-width:420px;gap:7px;margin-top:12px;grid-template-columns:1fr 1fr 1.2fr 1fr 1fr}
+.controls button{min-height:58px;font-size:27px;touch-action:none;user-select:none;-webkit-user-select:none}
+.controls span{font-size:10px}
+.postcard{font-size:13px;margin-top:10px;min-height:29px}.postcard b{font-size:10px}
+.souvenirs{display:none}
+@media(min-width:700px){.well{width:min(300px,calc((100dvh - 263px)/2))}}
+@media(max-height:650px){.scene{display:none}.well{width:min(100%,calc((100dvh - 225px)/2))}.postcard{display:none}aside strong{font-size:16px}}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:10px auto 12px;max-width:420px}
+.tabs button{font-size:12px;padding:7px 4px;min-height:43px;background:#153c39}
+.tabs button[aria-selected="true"]{background:#ae3748;border-color:#eaa69c}
+[hidden]{display:none!important}
+.progression{max-width:420px;margin:10px auto 0;background:#123c3e;border:1px solid #527b70;border-radius:9px;padding:8px 11px}
+.progression p{display:flex;justify-content:space-between;gap:10px;font-size:11px;margin:0 0 5px}
+progress{width:100%;height:8px;accent-color:#eac96a;display:block}
+.progression small{margin-top:5px;color:#d9d8ba}
+.well{width:min(100%,calc((100dvh - 376px)/2))}
+.postcard{display:none}
+.panel-heading{font:700 26px Georgia;color:#ffe0a0;margin:16px 0 8px}
+.panel-intro{font-size:13px;color:#b9d5cb;line-height:1.5}
+.collection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.collectible{border:1px solid #d9ba7955;border-radius:13px;background:linear-gradient(145deg,#205345,#123b40);padding:15px 10px;text-align:center}
+.collectible .object{font-size:35px;display:block;min-height:48px}
+.collectible h3{font-size:14px;margin:5px 0 8px;color:#ffe4ae}
+.collectible p{font-size:11px;line-height:1.4;color:#c3d8cf;margin:0}
+.collectible.locked{background:#152f32;border-color:#48625c}
+.collectible.locked h3{color:#b9c9c4}
+.collectible small{margin-top:8px;color:#ebd295}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{padding:17px 13px;border:1px solid #54776a;border-radius:12px;background:#173e37}
+.stat-card strong{display:block;font-size:27px;margin-top:7px}
+.save-note{font-size:11px;color:#adc7bb;line-height:1.5;margin-top:14px}
+@media(max-height:740px){.scene{display:none}.tabs{margin:7px auto 9px}.well{width:min(100%,calc((100dvh - 331px)/2))}.controls button{min-height:49px}.progression{padding:6px 9px}.progression small{font-size:9px}}
+@media(min-width:700px){.well{width:min(300px,calc((100dvh - 376px)/2))}}
+</style>
+<main>
+<header><h1>Blocos de Portugal</h1><p>🇵🇹 De Lisboa ao Porto</p></header>
+<div class="scene" aria-label="Un tram traverse les façades colorées de Lisbonne"><div class="houses" aria-hidden="true"><i class="house"></i><i class="house"></i><i class="house"></i><i class="house"></i><i class="house"></i><i class="house"></i><i class="house"></i><i class="house"></i><i class="house"></i></div><span class="tram" aria-hidden="true">🚋</span></div>
+<nav class="tabs" role="tablist" aria-label="Navigation">
+<button id="tab-play" role="tab" aria-selected="true" aria-controls="panel-play" data-tab="play">Jouer</button>
+<button id="tab-items" role="tab" aria-selected="false" aria-controls="panel-items" data-tab="items">Objets débloqués</button>
+<button id="tab-stats" role="tab" aria-selected="false" aria-controls="panel-stats" data-tab="stats">Statistiques</button>
+</nav>
+<section id="panel-play" role="tabpanel" aria-labelledby="tab-play">
+<section class="game"  aria-label="Partie">
+<div class="well">
+<canvas id="board" width="252" height="504" aria-label="Grille de jeu"></canvas>
+<div id="toast" class="toast" aria-live="polite"></div>
+<div id="overlay" class="overlay"><h2 id="message" aria-live="polite">Vamos jogar !</h2><button id="start">Bora jogar !</button></div>
+</div>
+<aside>
+<div class="tile"><small>Score</small><strong id="score">0</strong></div>
+<div class="tile"><small>Record</small><strong id="record">0</strong></div>
+<div class="tile"><small>Lignes</small><strong id="lines">0</strong></div>
+<div class="tile"><small>Niveau</small><strong id="level">1</strong></div>
+<div class="tile"><small>À suivre</small><canvas id="next" width="90" height="60" aria-label="Prochaine pièce"></canvas></div>
+<button id="pause" disabled>Pause</button>
+</aside>
+</section>
+<div class="controls" aria-label="Commandes tactiles">
+<button data-action="left">←<span>Gauche</span></button>
+<button data-action="right">→<span>Droite</span></button>
+<button data-action="rotate">↻<span>Pivoter</span></button>
+<button data-action="down">↓<span>Descendre</span></button>
+<button data-action="drop" aria-label="Poser immédiatement">⇊<span>Poser</span></button>
+</div>
+<div class="progression">
+<p><span id="progress-label">Niveau 1</span><span id="progress-remaining"></span></p>
+<progress id="xp-progress" max="500" value="0" aria-label="Progression vers le prochain niveau"></progress>
+<small id="next-reward"></small>
+</div>
+<div class="postcard"  id="postcard">Une escapade à Lisbonne<b>Azulejos, tram 28 et soleil sur le Tage</b></div>
+<div class="souvenirs" aria-label="Coq de Barcelos, football, sardines, océan et Portugal"><span title="Coq de Barcelos">🐓</span><span title="Futebol">⚽</span><span title="Sardinhas">🐟</span><span title="Atlantique">🌊</span><span title="Portugal">🇵🇹</span></div>
+
+</section>
+<section id="panel-items" role="tabpanel" aria-labelledby="tab-items" hidden>
+<h2 class="panel-heading">Souvenirs du Portugal</h2>
+<p class="panel-intro" id="collection-summary"></p>
+<div class="collection" id="collection"></div>
+</section>
+<section id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" hidden>
+<h2 class="panel-heading">Tes statistiques</h2>
+<div class="stat-grid" id="statistics"></div>
+<p class="save-note">Progression et objets sauvegardés dans ce navigateur. Les points gagnés pendant chaque partie s’ajoutent à ta progression, même après une défaite.</p>
+</section>
+</main>
+<script>
+'use strict';
+const get = id => document.getElementById(id);
+const board = get('board').getContext('2d');
+const preview = get('next').getContext('2d');
+const width = 9, height = 18, size = 28;
+const shapes = [
+  [[1,1,1],[0,1,0]],
+  [[1,0,0],[1,1,1]],
+  [[1,1],[1,0]],
+  [[1,1],[1,1]],
+  [[1,1,1]],
+  [[1,1,0],[0,1,1]],
+  [[1,1]]
+];
+const colors = ['#e3515f','#59ba84','#ffd36d','#eae0be','#72aac8','#e88851','#a7c975'];
+const symbols = ['🇵🇹','🚋','🐓','CR7','🐟','🥧','✦'];
+const symbolNames = ['Portugal','Tram de Lisbonne','Coq de Barcelos','CR7 · Futebol','Sardines','Pastel de nata','Azulejo'];
+const recordKey = 'blocos-maeva-record-v1';
+let best = 0;
+try { best = Number(localStorage.getItem(recordKey)) || 0; } catch {}
+
+const profileKey = 'blocos-portugal-profile-v1';
+const levelStep = 500;
+const souvenirs = [
+ ['🔷','Azulejo','Un carreau bleu inspiré des façades portugaises.'],
+ ['🥧','Pastel de nata','Une petite douceur à la crème et à la cannelle.'],
+ ['🐓','Coq de Barcelos','Un souvenir haut en couleur.'],
+ ['🚋','Tram de Lisbonne','Un tram miniature pour parcourir les ruelles.'],
+ ['🐟','Sardine décorative','Les couleurs des fêtes de Lisbonne.'],
+ ['⚽','Maillot CR7','Le numéro 7 entre dans ta collection.'],
+ ['🎸','Guitare portugaise','Les sonorités du fado dans une miniature.'],
+ ['🍒','Ginjinha','Un souvenir des petites échoppes de Lisbonne.'],
+ ['⛵','Bateau du Douro','Une embarcation inspirée des rives de Porto.'],
+ ['🏰','Palais de Sintra','Une miniature aux couleurs du palais.'],
+ ['🧣','Écharpe Portugal','Prête pour encourager la seleção.'],
+ ['🌊','Planche de Nazaré','Une planche miniature aux couleurs de l’océan.'],
+ ['🧀','Fromage de la Serra','Une spécialité à ajouter au panier.'],
+ ['🧺','Panier en liège','Une matière emblématique du Portugal.'],
+ ['🏝️','Carte de Madère','Un souvenir de l’île aux paysages verdoyants.'],
+ ['🍍','Ananas des Açores','Une touche tropicale dans ta collection.'],
+ ['🏆','Trophée du futebol','Une coupe dorée pour célébrer ta progression.'],
+ ['📿','Cœur de Viana','Un bijou inspiré du filigrane portugais.'],
+ ['🗼','Tour de Belém','Une miniature au bord du Tage.'],
+ ['🇵🇹','Drapeau de collection','Viva Portugal ! La collection est complète.']
+];
+let savedProfile = {};
+try { savedProfile = JSON.parse(localStorage.getItem(profileKey)) || {}; } catch {}
+const profile = {};
+for (const key of ['xp','lines','games','finished','seconds']) {
+  profile[key] = Number.isFinite(savedProfile[key]) && savedProfile[key] >= 0 ? savedProfile[key] : 0;
+}
+let accountedScore = 0, activeTab = 'play', lastSaved = 0;
+function playerLevel() { return 1 + Math.floor(profile.xp / levelStep); }
+function saveProfile() {
+  try { localStorage.setItem(profileKey,JSON.stringify(profile)); } catch {}
+}
+function updateProgress() {
+  const currentLevel = playerLevel();
+  const remaining = levelStep - profile.xp % levelStep;
+  get('progress-label').textContent = 'Niveau ' + currentLevel;
+  get('progress-remaining').textContent = remaining + ' points avant le niveau ' + (currentLevel+1);
+  get('xp-progress').value = profile.xp % levelStep;
+  get('next-reward').textContent = currentLevel < souvenirs.length
+    ? 'Prochain objet · ' + souvenirs[currentLevel][1]
+    : 'Tous les objets sont débloqués !';
+}
+function renderCollection() {
+  const unlocked = Math.min(playerLevel(),souvenirs.length);
+  get('collection-summary').textContent = unlocked + ' / ' + souvenirs.length + ' objets débloqués · Un nouvel objet à chaque niveau, jusqu’au niveau 20.';
+  get('collection').replaceChildren();
+  souvenirs.forEach(([icon,name,description],index) => {
+    const card = document.createElement('article');
+    const isUnlocked = index < unlocked;
+    card.className = 'collectible' + (isUnlocked ? '' : ' locked');
+    const object = document.createElement('span');
+    object.className = 'object';
+    object.textContent = isUnlocked ? icon : '🔒';
+    const title = document.createElement('h3');
+    title.textContent = name;
+    const detail = document.createElement('p');
+    detail.textContent = isUnlocked ? description : 'À débloquer en jouant';
+    const status = document.createElement('small');
+    status.textContent = isUnlocked ? 'Débloqué · Niveau ' + (index+1) : 'Niveau ' + (index+1) + ' · ' + index*levelStep + ' points cumulés';
+    card.append(object,title,detail,status);
+    get('collection').append(card);
+  });
+}
+function renderStats() {
+  get('statistics').replaceChildren();
+  const entries = [
+    ['Niveau atteint',playerLevel()],['Points cumulés',Math.floor(profile.xp)],
+    ['Meilleur score',best],['Lignes effacées',profile.lines],
+    ['Parties lancées',profile.games],['Parties terminées',profile.finished],
+    ['Objets débloqués',Math.min(playerLevel(),souvenirs.length) + ' / ' + souvenirs.length],
+    ['Temps de jeu',Math.floor(profile.seconds/60) + ' min']
+  ];
+  for (const [label,value] of entries) {
+    const card = document.createElement('div');
+    card.className = 'stat-card';
+    const caption = document.createElement('small');
+    caption.textContent = label;
+    const number = document.createElement('strong');
+    number.textContent = value;
+    card.append(caption,number);
+    get('statistics').append(card);
+  }
+}
+function openTab(tab) {
+  if (tab !== 'play' && state === 'playing') togglePause();
+  activeTab = tab;
+  for (const name of ['play','items','stats']) {
+    get('panel-' + name).hidden = name !== tab;
+    get('tab-' + name).setAttribute('aria-selected',String(name === tab));
+  }
+  if (tab === 'items') renderCollection();
+  if (tab === 'stats') renderStats();
+  saveProfile();
+}
+document.querySelectorAll('[data-tab]').forEach(button => {
+  button.onclick = () => openTab(button.dataset.tab);
+});
+const emptyRow = () => Array(width).fill(null);
+let grid = Array.from({length:height},emptyRow);
+let bag = [], upcoming, piece, score = 0, lines = 0, level = playerLevel();
+let state = 'ready', lastFall = 0, groundedSince = null;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let particles = [], flashes = [], trails = [], toastTimer;
+const postcards = [
+  ['Une escapade à Lisbonne','Azulejos, tram 28 et soleil sur le Tage'],
+  ['Bom dia, Porto !','Les rives du Douro et les couleurs de Ribeira'],
+  ['Direction l’Algarve','Falaises dorées et vagues de l’Atlantique'],
+  ['Un tour à Sintra','Un palais haut en couleur et des collines verdoyantes'],
+  ['Olá, Nazaré !','Des vagues géantes et l’air du large'],
+  ['Pause pastel de nata','Une touche de cannelle, et c’est reparti !'],
+  ['Viva o São João !','Porto fait la fête sous les guirlandes'],
+  ['Le coq de Barcelos veille','Un peu de chance pour ta prochaine pièce'],
+  ['Saudade & fado','Une soirée dans les ruelles de l’Alfama'],
+  ['Força, Maeva !','L’esprit du futebol, une ligne après l’autre'],
+  ['Cap sur Madère','Des montagnes vertes au milieu de l’Atlantique'],
+  ['Bienvenue aux Açores','Lacs volcaniques et paysages verdoyants']
+];
+function animateWell(name) {
+  if (reducedMotion) return;
+  const well = document.querySelector('.well');
+  well.classList.remove(name);
+  void well.offsetWidth;
+  well.classList.add(name);
+}
+function celebrate(title, subtitle) {
+  const toast = get('toast');
+  toast.replaceChildren(document.createTextNode(title));
+  const detail = document.createElement('small');
+  detail.textContent = subtitle;
+  toast.append(detail);
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'),1500);
+}
+function burst(x,y,count) {
+  if (reducedMotion) return;
+  for (let i=0;i<count;i++) particles.push({
+    x,y,vx:(Math.random()-.5)*160,vy:-40-Math.random()*140,
+    color:['#ed4c5c','#4ccb87','#ffe18a','#e3f4ee'][i%4],
+    life:.6+Math.random()*.4
+  });
+}
+function setPostcard() {
+  const [title, subtitle] = postcards[(level-1)%postcards.length];
+  get('postcard').replaceChildren(document.createTextNode(title));
+  const detail = document.createElement('b');
+  detail.textContent = subtitle;
+  get('postcard').append(detail);
+}
+
+const scores = [0,100,300,500,800];
+function takePiece() {
+  if (!bag.length) {
+    bag = shapes.map((_, index) => index);
+    for (let i = bag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [bag[i], bag[j]] = [bag[j], bag[i]];
+    }
+  }
+  return bag.pop();
+}
+function eachCell(shape, callback) {
+  shape.forEach((row,y) => row.forEach((occupied,x) => {
+    if (occupied) callback(x,y);
+  }));
+}
+function fits(shape, x, y) {
+  let valid = true;
+  eachCell(shape,(dx,dy) => {
+    const col = x + dx, row = y + dy;
+    if (col < 0 || col >= width || row < 0 || row >= height || grid[row][col] !== null) valid = false;
+  });
+  return valid;
+}
+function hud() {
+  const previousLevel = playerLevel();
+  profile.xp += Math.max(0,score-accountedScore);
+  accountedScore = score;
+  level = playerLevel();
+  if (level > previousLevel) {
+    setPostcard();
+    animateWell('levelup');
+    const earned = souvenirs.slice(previousLevel,Math.min(level,souvenirs.length));
+    const reward = earned.length ? 'Objet débloqué · ' + earned.map(item => item[1]).join(', ') : 'Força Portugal !';
+    celebrate('Niveau ' + level + ' !',reward);
+    burst(126,120,55);
+  }
+  updateProgress();
+  saveProfile();
+  if (score > best) {
+    best = score;
+    try { localStorage.setItem(recordKey,String(best)); } catch {}
+  }
+  for (const [id,value] of Object.entries({score,record:best,lines,level})) get(id).textContent = value;
+}
+function setState(value) {
+  if (value === 'ended' && state !== 'ended') {
+    profile.finished++;
+    saveProfile();
+  }
+  state = value;
+  get('overlay').hidden = value === 'playing';
+  get('pause').disabled = value === 'ready' || value === 'ended';
+  get('pause').textContent = value === 'paused' ? 'Reprendre' : 'Pause';
+  if (value === 'paused' || value === 'ended') {
+    get('message').textContent = value === 'paused' ? 'En pause' : 'Partie terminée';
+    get('start').textContent = value === 'paused' ? 'Reprendre' : 'Rejouer';
+  }
+}
+function spawn() {
+  const shape = shapes[upcoming];
+  piece = {shape,color:colors[upcoming],x:Math.floor((width-shape[0].length)/2),y:0};
+  upcoming = takePiece();
+  lastFall = performance.now();
+  groundedSince = null;
+  get('next').setAttribute('aria-label','Prochaine pièce · ' + symbolNames[upcoming]);
+  if (!fits(shape,piece.x,piece.y)) {
+    piece = null;
+    setState('ended');
+  }
+}
+function lock() {
+  eachCell(piece.shape,(x,y) => {grid[piece.y+y][piece.x+x] = piece.color;});
+  const fullRows = grid.flatMap((row,y) => row.includes(null) ? [] : [y]);
+  for (const y of fullRows) {
+    flashes.push({y,life:.35});
+    for (let x=0;x<width;x++) burst((x+.5)*size,(y+.5)*size,5);
+  }
+  grid = grid.filter(row => row.includes(null));
+  const cleared = height - grid.length;
+  while (grid.length < height) grid.unshift(emptyRow());
+  const earnedPoints = scores[cleared] * (1 + Math.floor(lines / 12));
+  score += earnedPoints;
+  lines += cleared;
+  profile.lines += cleared;
+  if (cleared) {
+    celebrate(['','Boa, Maeva !','Que espetáculo !','Maravilha !','Portugal em festa !'][cleared], '+' + earnedPoints + ' points · ' + cleared + (cleared === 1 ? ' ligne' : ' lignes'));
+  }
+  hud();
+  spawn();
+}
+function fall(manual) {
+  if (fits(piece.shape,piece.x,piece.y+1)) {
+    piece.y++;
+    if (manual) score++;
+    groundedSince = null;
+  } else if (groundedSince === null) groundedSince = performance.now();
+  lastFall = performance.now();
+}
+function landing() {
+  let y = piece.y;
+  while (fits(piece.shape,piece.x,y+1)) y++;
+  return y;
+}
+function action(name) {
+  if (state !== 'playing') return;
+  if (name === 'left' || name === 'right') {
+    const x = piece.x + (name === 'left' ? -1 : 1);
+    if (fits(piece.shape,x,piece.y)) piece.x = x;
+  }
+  if (name === 'rotate') {
+    const shape = piece.shape[0].map((_,x) => piece.shape.map(row => row[x]).reverse());
+    for (const [dx,dy] of [[0,0],[-1,0],[1,0],[-2,0],[2,0],[0,-1],[0,-2]]) {
+      if (fits(shape,piece.x+dx,piece.y+dy)) {
+        piece = {...piece,shape,x:piece.x+dx,y:piece.y+dy};
+        break;
+      }
+    }
+  }
+  if (name === 'down') fall(true);
+  if (name === 'drop') {
+    const y = landing();
+    score += 2 * (y-piece.y);
+    if (!reducedMotion) eachCell(piece.shape,(x,dy) => trails.push({x:piece.x+x,from:piece.y+dy,to:y+dy,color:piece.color,life:.22}));
+    piece.y = y;
+    burst((piece.x+piece.shape[0].length/2)*size,(piece.y+piece.shape.length)*size,12);
+    animateWell('impact');
+    lock();
+  }
+  hud();
+  draw();
+}
+function block(ctx,x,y,s,color,ghost=false) {
+  ctx.globalAlpha = ghost ? .38 : 1;
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  if (ghost) ctx.strokeRect(x+3,y+3,s-6,s-6);
+  else {
+    ctx.fillRect(x+1,y+1,s-2,s-2);
+    // Motif de carreau peint sur chaque bloc.
+    ctx.strokeStyle = '#ffffff36';
+    ctx.beginPath();
+    ctx.moveTo(x+s/2,y+5);
+    ctx.lineTo(x+s-5,y+s/2);
+    ctx.lineTo(x+s/2,y+s-5);
+    ctx.lineTo(x+5,y+s/2);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff44';
+    ctx.fillRect(x+3,y+3,s-6,2);
+    ctx.fillStyle = '#00000028';
+    ctx.fillRect(x+3,y+s-5,s-6,2);
+    const symbol = symbols[colors.indexOf(color)];
+    if (symbol) {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = symbol === 'CR7' ? 'bold ' + Math.round(s*.38) + 'px system-ui' : Math.round(s*.61) + 'px system-ui';
+      ctx.fillStyle = '#112f29';
+      ctx.fillText(symbol,x+s/2,y+s/2+1);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+function draw() {
+  board.clearRect(0,0,252,504);
+  grid.forEach((row,y) => row.forEach((color,x) => {
+    board.fillStyle = (x+y)%2 ? '#13231d' : '#162920';
+    board.fillRect(x*size,y*size,size,size);
+    if (color) block(board,x*size,y*size,size,color);
+  }));
+  if (piece) {
+    const y = landing();
+    if (y !== piece.y) eachCell(piece.shape,(x,dy) => block(board,(piece.x+x)*size,(y+dy)*size,size,piece.color,true));
+    eachCell(piece.shape,(x,y) => block(board,(piece.x+x)*size,(piece.y+y)*size,size,piece.color));
+  }
+  for (const trail of trails) {
+    board.globalAlpha = trail.life;
+    board.fillStyle = trail.color;
+    board.fillRect(trail.x*size+5,trail.from*size+5,size-10,(trail.to-trail.from+1)*size-10);
+  }
+  for (const flash of flashes) {
+    board.globalAlpha = flash.life*2;
+    board.fillStyle = '#fff3b9';
+    board.fillRect(0,flash.y*size,252,size);
+  }
+  for (const particle of particles) {
+    board.globalAlpha = Math.min(1,particle.life*2);
+    board.fillStyle = particle.color;
+    board.fillRect(particle.x,particle.y,4,6);
+  }
+  board.globalAlpha = 1;
+  preview.clearRect(0,0,90,60);
+  if (upcoming !== undefined && state !== 'ended') {
+    const shape = shapes[upcoming], s = 17;
+    eachCell(shape,(x,y) => block(preview,(90-shape[0].length*s)/2+x*s,(60-shape.length*s)/2+y*s,s,colors[upcoming]));
+  }
+}
+function togglePause() {
+  if (state === 'playing') setState('paused');
+  else if (state === 'paused') {
+    lastFall = performance.now();
+    groundedSince = null;
+    setState('playing');
+  }
+}
+get('start').onclick = () => {
+  if (state === 'paused') { togglePause(); return; }
+  grid = Array.from({length:height},emptyRow);
+  bag = [];
+  score = lines = 0;
+  accountedScore = 0;
+  level = playerLevel();
+  profile.games++;
+  saveProfile();
+  particles = []; flashes = []; trails = [];
+  clearTimeout(toastTimer);
+  get('toast').classList.remove('show');
+  setPostcard();
+  upcoming = takePiece();
+  setState('playing');
+  spawn();
+  hud();
+  draw();
+};
+get('pause').onclick = togglePause;
+document.querySelectorAll('[data-action]').forEach(button => {
+  let repeatTimer;
+  let repeatInterval;
+  const stopRepeat = () => {
+    clearTimeout(repeatTimer);
+    clearInterval(repeatInterval);
+  };
+  button.addEventListener('pointerdown',event => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    stopRepeat();
+    button.setPointerCapture(event.pointerId);
+    action(button.dataset.action);
+    if (['left','right','down'].includes(button.dataset.action)) {
+      repeatTimer = setTimeout(() => {
+        repeatInterval = setInterval(() => action(button.dataset.action),110);
+      },280);
+    }
+  });
+  for (const event of ['pointerup','pointercancel','lostpointercapture']) button.addEventListener(event,stopRepeat);
+  button.onclick = event => {
+    if (event.detail === 0) action(button.dataset.action);
+  };
+});
+const keys = {ArrowLeft:'left',ArrowRight:'right',ArrowUp:'rotate',ArrowDown:'down',Space:'drop'};
+document.addEventListener('keydown',event => {
+  if (activeTab !== 'play') return;
+  if (event.ctrlKey || event.altKey || event.metaKey) return;
+  if (event.code === 'KeyP' && !event.repeat) togglePause();
+  const name = keys[event.code];
+  if (state !== 'playing' || !name) return;
+  if (event.code === 'Space' && document.activeElement === get('pause')) {
+    document.activeElement.blur();
+  }
+  event.preventDefault();
+  if (event.repeat && (name === 'rotate' || name === 'drop')) return;
+  action(name);
+});
+document.addEventListener('visibilitychange',() => {
+  if (document.hidden && state === 'playing') togglePause();
+  saveProfile();
+});
+let lastFrame = 0;
+function tick(now) {
+  const delta = Math.min(.05,(now-lastFrame)/1000);
+  lastFrame = now;
+  if (state === 'playing') {
+    profile.seconds += delta;
+    if (now-lastSaved > 5000) { saveProfile(); lastSaved = now; }
+    for (const particle of particles) {
+      particle.x += particle.vx*delta;
+      particle.y += particle.vy*delta;
+      particle.vy += 260*delta;
+      particle.life -= delta;
+    }
+    for (const flash of flashes) flash.life -= delta;
+    for (const trail of trails) trail.life -= delta;
+    particles = particles.filter(particle => particle.life > 0);
+    flashes = flashes.filter(flash => flash.life > 0);
+    trails = trails.filter(trail => trail.life > 0);
+  }
+  if (state === 'playing' && now-lastFall >= Math.max(380,1250*Math.pow(.93,Math.floor(lines/12)))) {
+    fall(false);
+  }
+  if (state === 'playing' && piece) {
+    if (fits(piece.shape,piece.x,piece.y+1)) groundedSince = null;
+    else {
+      if (groundedSince === null) groundedSince = now;
+      if (now-groundedSince >= 700) lock();
+    }
+    draw();
+  }
+  requestAnimationFrame(tick);
+}
+window.addEventListener('pagehide',saveProfile);
+hud();
+draw();
+requestAnimationFrame(tick);
+</script>
+</html>
