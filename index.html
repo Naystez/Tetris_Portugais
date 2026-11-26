@@ -129,25 +129,39 @@ progress{width:100%;height:8px;accent-color:#eac96a;display:block}
 .twelve-portrait{width:100%;height:min(41svh,350px);object-fit:contain;filter:drop-shadow(0 7px 16px #0005);position:relative}
 .welcome h1{position:relative;z-index:1}
 #enter-game{margin-top:5px}
-.level-celebration{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:#061e24eF;backdrop-filter:blur(9px);overflow:auto}
-.level-card{width:min(100%,370px);padding:30px 22px;text-align:center;border:1px solid #e4c47c99;border-radius:25px;background:radial-gradient(ellipse at top,#53714488,transparent 70%),#123b35;box-shadow:0 0 80px #d5b16b22;position:relative;isolation:isolate;animation:reward-arrival .65s cubic-bezier(.18,.8,.25,1) both}
-.level-card:before{content:"";position:absolute;inset:9px;border:1px solid #d5bc6a33;border-radius:18px;pointer-events:none}
-.level-card .level-kicker{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#ead49f;margin:0 0 12px}
-.level-card h2{font-size:37px;color:#ffe19d;margin:0 0 10px}
-.level-card .reward-copy{font-size:13px;color:#cce3d4;margin:0 0 8px}
-.level-rewards{display:grid;gap:10px;margin:18px 0}
-.level-reward{padding:12px 7px;border-radius:14px;background:#082a2877;animation:reward-arrival .7s ease-out both}
-.level-reward .reward-icon{display:block;font:64px system-ui;line-height:1.3;filter:drop-shadow(0 0 18px #ffde8c66);animation:reward-float 2.2s ease-in-out infinite}
-.level-reward strong{display:block;font-size:19px;margin:8px 0 5px}
-.level-reward small{font-size:12px;color:#bfd9ca}
-#level-continue{width:100%;margin-top:8px;background:linear-gradient(120deg,#9f3143,#ce4b52);border-color:#efb0a1;min-height:50px}
-.level-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.level-confetti i{position:absolute;left:var(--left);top:-20px;width:8px;height:14px;background:var(--color);animation:confetti-fall var(--duration) var(--delay) linear infinite;opacity:0}
-@keyframes reward-arrival{from{opacity:0;transform:translateY(24px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes reward-float{50%{transform:translateY(-7px) rotate(5deg)}}
-@keyframes confetti-fall{5%{opacity:1}to{opacity:0;transform:translate3d(var(--drift),105svh,0) rotate(540deg)}}
-@media(max-height:650px){.welcome{gap:10px}.twelve-portrait{height:36svh}.level-card{padding:20px 18px}.level-card h2{font-size:29px}.level-reward .reward-icon{font-size:45px}.level-rewards{margin:10px 0}}
-@media(prefers-reduced-motion:reduce){.level-confetti{display:none}}
+
+@media(max-height:650px){.welcome{gap:10px}.twelve-portrait{height:36svh}}
+.progression{position:relative;overflow:hidden}
+.level-notice{position:absolute;inset:0;display:flex;align-items:center;gap:10px;padding:6px 12px;background:linear-gradient(110deg,#1c5542,#173f42);border-left:3px solid #ebc975;pointer-events:none}
+.level-notice strong{font-size:14px;display:block}
+.level-notice small{font-size:11px;color:#e3e8d3;margin-top:3px}
+#level-icon{font-size:29px;flex-shrink:0}
+.level-notice.arriving{animation:notice-arrival .4s ease-out}
+@keyframes notice-arrival{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){
+ #app{max-width:500px;padding:6px 10px max(8px,env(safe-area-inset-bottom))}
+ #app header{margin-bottom:0}
+ #app header:before{height:3px;margin-bottom:3px}
+ #app header h1{font-size:26px}
+ #app header p{display:none}
+ #app .scene{display:none}
+ .tabs{margin:6px auto 9px;gap:5px}
+ .tabs button{min-height:36px;padding:5px 3px;font-size:11px}
+ .game{display:grid;grid-template-columns:minmax(0,1fr) 62px;gap:10px;max-width:100%;align-items:start}
+ .well{grid-column:1;grid-row:1;width:min(100%,calc((100dvh - 209px - env(safe-area-inset-bottom))/2));min-width:0;justify-self:center;align-self:start;border-width:3px}
+ aside{grid-column:2;grid-row:1;order:0;display:grid;grid-template-columns:1fr;gap:7px;width:62px}
+ .tile{padding:7px 3px}small{font-size:10px}strong{font-size:18px}
+ #next{height:44px;max-height:44px}
+ #pause{min-height:44px;font-size:11px}
+ .controls{margin-top:10px;max-width:100%;gap:6px}
+ .controls button{min-height:52px;font-size:27px}
+ .controls span{font-size:9px}
+ .progression{margin-top:9px;max-width:100%;padding:7px 9px}
+ .progression p{font-size:10px;margin-bottom:4px}
+ .progression small{font-size:10px;margin-top:4px}
+ .well.levelup{animation:glow .55s ease-out}
+}
+@media(prefers-reduced-motion:reduce){.level-notice.arriving{animation:none}}
 </style>
 <section class="welcome" id="welcome" aria-labelledby="welcome-title">
 <div class="welcome-flag" aria-hidden="true">🇵🇹</div>
@@ -190,6 +204,10 @@ progress{width:100%;height:8px;accent-color:#eac96a;display:block}
 <p><span id="progress-label">Niveau 1</span><span id="progress-remaining"></span></p>
 <progress id="xp-progress" max="500" value="0" aria-label="Progression vers le prochain niveau"></progress>
 <small id="next-reward"></small>
+<div id="level-celebration" class="level-notice" role="status" aria-live="polite" hidden>
+<span id="level-icon" aria-hidden="true"></span>
+<div><strong id="level-title"></strong><small id="level-description"></small></div>
+</div>
 </div>
 <div class="postcard"  id="postcard">Une escapade à Lisbonne<b>Azulejos, tram 28 et soleil sur le Tage</b></div>
 <div class="souvenirs" aria-label="Coq de Barcelos, football, sardines, océan et Portugal"><span title="Coq de Barcelos">🐓</span><span title="Futebol">⚽</span><span title="Sardinhas">🐟</span><span title="Atlantique">🌊</span><span title="Portugal">🇵🇹</span></div>
@@ -206,21 +224,13 @@ progress{width:100%;height:8px;accent-color:#eac96a;display:block}
 <p class="save-note">Progression et objets sauvegardés dans ce navigateur. Les points gagnés pendant chaque partie s’ajoutent à ta progression, même après une défaite.</p>
 </section>
 </main>
-<section id="level-celebration" class="level-celebration" role="dialog" aria-modal="true" aria-labelledby="level-title" aria-describedby="level-description" hidden>
-<div class="level-confetti" id="level-confetti" aria-hidden="true"></div>
-<div class="level-card">
-<p class="level-kicker">🇵🇹 Parabéns !</p>
-<h2 id="level-title"></h2>
-<p class="reward-copy" id="level-description"></p>
-<div id="level-rewards" class="level-rewards"></div>
-<button id="level-continue">Continuer à jouer</button>
-</div>
-</section>
+
 <script>
 'use strict';
 const get = id => document.getElementById(id);
 const board = get('board').getContext('2d');
 const preview = get('next').getContext('2d');
+const twelvePortrait = document.querySelector('.twelve-portrait');
 const width = 9, height = 18, size = 28;
 const shapes = [
   [[1,1,1],[0,1,0]],
@@ -232,8 +242,8 @@ const shapes = [
   [[1,1]]
 ];
 const colors = ['#e3515f','#59ba84','#ffd36d','#eae0be','#72aac8','#e88851','#a7c975'];
-const symbols = ['🇵🇹','🚋','🐓','CR7','🐟','🥧','✦'];
-const symbolNames = ['Portugal','Tram de Lisbonne','Coq de Barcelos','CR7 · Futebol','Sardines','Pastel de nata','Azulejo'];
+const symbols = ['🇵🇹','🚋','🐓','CR7','🐟','🥧','Twelve'];
+const symbolNames = ['Portugal','Tram de Lisbonne','Coq de Barcelos','CR7 · Futebol','Sardines','Pastel de nata','Twelve'];
 const recordKey = 'blocos-maeva-record-v1';
 let best = 0;
 try { best = Number(localStorage.getItem(recordKey)) || 0; } catch {}
@@ -340,7 +350,7 @@ document.querySelectorAll('[data-tab]').forEach(button => {
 });
 const emptyRow = () => Array(width).fill(null);
 let grid = Array.from({length:height},emptyRow);
-let bag = [], upcoming, piece, score = 0, lines = 0, level = playerLevel();
+let upcoming, piece, score = 0, lines = 0, level = playerLevel();
 let state = 'ready', lastFall = 0, groundedSince = null;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let particles = [], flashes = [], trails = [], toastTimer;
@@ -395,14 +405,7 @@ function setPostcard() {
 
 const scores = [0,100,300,500,800];
 function takePiece() {
-  if (!bag.length) {
-    bag = shapes.map((_, index) => index);
-    for (let i = bag.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [bag[i], bag[j]] = [bag[j], bag[i]];
-    }
-  }
-  return bag.pop();
+  return Math.floor(Math.random() * shapes.length);
 }
 function eachCell(shape, callback) {
   shape.forEach((row,y) => row.forEach((occupied,x) => {
@@ -417,60 +420,24 @@ function fits(shape, x, y) {
   });
   return valid;
 }
-let resumeAfterReward = false;
-let rewardPreviousFocus;
-function presentLevel(currentLevel, earned) {
-  rewardPreviousFocus = document.activeElement;
-  resumeAfterReward = state === 'playing';
-  if (resumeAfterReward) togglePause();
-  get('level-title').textContent = 'Niveau ' + currentLevel + ' !';
-  get('level-description').textContent = earned.length > 1 ? earned.length + ' nouveaux objets débloqués' : earned.length ? 'Un nouveau souvenir rejoint ta collection' : 'Un nouveau niveau atteint. Força Portugal !';
-  get('level-rewards').replaceChildren();
-  const rewards = earned.length ? earned : [['🇵🇹','Viva Portugal !','La collection complète t’accompagne.']];
-  rewards.forEach(([icon,name,description],index) => {
-    const item = document.createElement('div');
-    item.className = 'level-reward';
-    item.style.animationDelay = index*.12 + 's';
-    const picture = document.createElement('span');
-    picture.className = 'reward-icon';
-    picture.textContent = icon;
-    const title = document.createElement('strong');
-    title.textContent = name;
-    const detail = document.createElement('small');
-    detail.textContent = description;
-    item.append(picture,title,detail);
-    get('level-rewards').append(item);
-  });
-  get('level-confetti').replaceChildren();
-  if (!reducedMotion) for (let i=0;i<36;i++) {
-    const particle = document.createElement('i');
-    particle.style.setProperty('--left', (i*97%100) + '%');
-    particle.style.setProperty('--color',['#e94c5d','#4cba7c','#f5d27e'][i%3]);
-    particle.style.setProperty('--duration', (2.5+i%5*.4) + 's');
-    particle.style.setProperty('--delay', (i%9*.12) + 's');
-    particle.style.setProperty('--drift', (i%2 ? 70 : -70) + 'px');
-    get('level-confetti').append(particle);
-  }
-  get('app').inert = true;
-  get('welcome').inert = true;
-  get('level-celebration').hidden = false;
-  get('level-continue').focus();
-}
+let levelNoticeTimer;
 function dismissLevel() {
+  clearTimeout(levelNoticeTimer);
   get('level-celebration').hidden = true;
-  get('level-confetti').replaceChildren();
-  get('app').inert = false;
-  get('welcome').inert = false;
-  if (resumeAfterReward && state === 'paused' && activeTab === 'play' && get('welcome').hidden) togglePause();
-  if (rewardPreviousFocus && rewardPreviousFocus.isConnected) rewardPreviousFocus.focus();
-  else get('tab-play').focus();
-  resumeAfterReward = false;
 }
-get('level-continue').onclick = dismissLevel;
-get('level-celebration').addEventListener('keydown',event => {
-  if (event.key === 'Tab') { event.preventDefault(); get('level-continue').focus(); }
-  if (event.key === 'Escape') { event.preventDefault(); dismissLevel(); }
-});
+function presentLevel(currentLevel, earned) {
+  clearTimeout(levelNoticeTimer);
+  get('level-title').textContent = 'Niveau ' + currentLevel + ' · Parabéns !';
+  get('level-icon').textContent = earned.length ? earned[earned.length-1][0] : '🇵🇹';
+  get('level-description').textContent = earned.length
+    ? earned.map(item => item[1]).join(' · ') + (earned.length > 1 ? ' débloqués' : ' débloqué')
+    : 'Força Portugal !';
+  get('level-celebration').hidden = false;
+  get('level-celebration').classList.remove('arriving');
+  void get('level-celebration').offsetWidth;
+  get('level-celebration').classList.add('arriving');
+  levelNoticeTimer = setTimeout(dismissLevel,2400);
+}
 function hud() {
   const previousLevel = playerLevel();
   profile.xp += Math.max(0,score-accountedScore);
@@ -481,7 +448,7 @@ function hud() {
     animateWell('levelup');
     const earned = souvenirs.slice(previousLevel,Math.min(level,souvenirs.length));
     presentLevel(level,earned);
-    burst(126,120,55);
+
   }
   updateProgress();
   saveProfile();
@@ -599,12 +566,24 @@ function block(ctx,x,y,s,color,ghost=false) {
     ctx.fillStyle = '#00000028';
     ctx.fillRect(x+3,y+s-5,s-6,2);
     const symbol = symbols[colors.indexOf(color)];
-    if (symbol) {
+    if (symbol === 'Twelve' && twelvePortrait.complete && twelvePortrait.naturalWidth) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x+s/2,y+s/2,s*.41,0,Math.PI*2);
+      ctx.clip();
+      ctx.fillStyle = '#edf3e6';
+      ctx.fillRect(x,y,s,s);
+      ctx.drawImage(twelvePortrait,
+        twelvePortrait.naturalWidth*.04,0,
+        twelvePortrait.naturalWidth*.53,twelvePortrait.naturalHeight*.77,
+        x+s*.08,y+s*.08,s*.84,s*.84);
+      ctx.restore();
+    } else if (symbol) {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = symbol === 'CR7' ? 'bold ' + Math.round(s*.38) + 'px system-ui' : Math.round(s*.61) + 'px system-ui';
       ctx.fillStyle = '#112f29';
-      ctx.fillText(symbol,x+s/2,y+s/2+1);
+      ctx.fillText(symbol === 'Twelve' ? '🐾' : symbol,x+s/2,y+s/2+1);
     }
   }
   ctx.globalAlpha = 1;
@@ -654,8 +633,8 @@ function togglePause() {
 get('start').onclick = () => {
   if (state === 'paused') { togglePause(); return; }
   grid = Array.from({length:height},emptyRow);
-  bag = [];
   score = lines = 0;
+  dismissLevel();
   accountedScore = 0;
   level = playerLevel();
   profile.games++;
@@ -697,7 +676,7 @@ document.querySelectorAll('[data-action]').forEach(button => {
 });
 const keys = {ArrowLeft:'left',ArrowRight:'right',ArrowUp:'rotate',ArrowDown:'down',Space:'drop'};
 document.addEventListener('keydown',event => {
-  if (!get('level-celebration').hidden || !get('welcome').hidden || activeTab !== 'play') return;
+  if (!get('welcome').hidden || activeTab !== 'play') return;
   if (event.ctrlKey || event.altKey || event.metaKey) return;
   if (event.code === 'KeyP' && !event.repeat) togglePause();
   const name = keys[event.code];
@@ -757,6 +736,7 @@ get('home-button').onclick = () => {
   get('welcome').hidden = false;
   get('enter-game').focus();
 };
+twelvePortrait.addEventListener('load',draw);
 window.addEventListener('pagehide',saveProfile);
 hud();
 draw();
