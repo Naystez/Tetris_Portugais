@@ -162,6 +162,40 @@ progress{width:100%;height:8px;accent-color:#eac96a;display:block}
  .well.levelup{animation:glow .55s ease-out}
 }
 @media(prefers-reduced-motion:reduce){.level-notice.arriving{animation:none}}
+
+/* TwelveTris — interface contemporaine */
+:root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:radial-gradient(ellipse at 10% 0,#18544677,transparent 58%),radial-gradient(ellipse at 100% 80%,#60304444,transparent 65%),#081a22}
+body:before{opacity:.035;background:repeating-conic-gradient(from 45deg,#b9e9ed 0 25%,transparent 0 50%) 0 0/64px 64px}
+#app header h1{font-family:inherit;font-style:normal;font-weight:850;letter-spacing:-1.1px;color:#fff1ce;text-shadow:none}
+#app header:before{background:linear-gradient(90deg,#4ac399 40%,#e06a7a 40%);opacity:.85;border-radius:20px}
+.tabs{padding:4px;border:1px solid #b7d6ce16;border-radius:15px;background:#132d32b3;gap:3px}
+.tabs button{border:0;border-radius:11px;background:transparent;color:#a9c6c5;font-weight:650;transition:background .18s,color .18s}
+.tabs button[aria-selected="true"]{background:#34675d;color:#f6f1df;box-shadow:0 3px 10px #0003}
+.well{border:2px solid #a5ddd440;outline:none;border-radius:15px;background:#0b232c;box-shadow:0 0 0 4px #23494955,0 16px 36px #0005}
+.tile{background:linear-gradient(145deg,#1c3b43bb,#12312fbb);border:1px solid #a0c9c425;border-radius:11px;box-shadow:inset 0 1px #ffffff08}
+.tile small{color:#9cbbb9;letter-spacing:.15px}
+.tile strong{color:#e8eee6;font-weight:750;font-variant-numeric:tabular-nums}
+#pause{border-radius:11px;background:#254449;border-color:#8abbb72e;color:#d9e7df}
+.controls button{border:1px solid #aed7c72b;border-radius:14px;background:linear-gradient(#31594e,#21483e);box-shadow:0 3px 0 #061a17, inset 0 1px #ffffff12;color:#eff8e9;transition:transform .1s,filter .1s}
+.controls button[data-action="rotate"]{background:linear-gradient(#a85163,#773849);border-color:#ec97a44d}
+.controls button[data-action="drop"]{background:linear-gradient(#c0a467,#967e4c);color:#152b29;border-color:#ebd59f55}
+.controls button:active{filter:brightness(1.15)}
+.progression{background:linear-gradient(110deg,#1b373e,#193d34);border:1px solid #a5d5bf25;border-radius:12px}
+progress{border:0;border-radius:8px;overflow:hidden;background:#081e25}
+progress::-webkit-progress-bar{background:#081e25;border-radius:8px}
+progress::-webkit-progress-value{background:linear-gradient(90deg,#52c599,#e5ce88);border-radius:8px;transition:width .3s}
+progress::-moz-progress-bar{background:linear-gradient(90deg,#52c599,#e5ce88)}
+.collectible,.stat-card{border-color:#a5d5bf28;border-radius:17px;background:linear-gradient(140deg,#20483e,#15333c);box-shadow:0 7px 20px #0002}
+.panel-heading{font-family:inherit;letter-spacing:-.5px;font-weight:750}
+.welcome:before{border-radius:32px;border-color:#cfddbf30}
+.welcome h1{font-family:inherit;font-weight:850;letter-spacing:-2px}
+.welcome h1 span{font:500 21px ui-sans-serif,-apple-system,sans-serif;letter-spacing:0}
+#enter-game{border-radius:16px;border:1px solid #eea3a14d;background:linear-gradient(110deg,#ba4b63,#984451);box-shadow:0 5px 20px #0004}
+.overlay{background:linear-gradient(#102e34f0,#153b32ed)}
+.overlay h2{font-family:inherit;font-size:24px;letter-spacing:-.4px}
+#start{border-radius:13px;border-color:#e99ea15c;background:linear-gradient(120deg,#b65163,#954658);box-shadow:0 4px 14px #0003}
+@media(max-width:600px){.tabs button{min-height:32px}.tabs{margin-top:5px;margin-bottom:9px}.well{border-radius:13px}}
 </style>
 <section class="welcome" id="welcome" aria-labelledby="welcome-title">
 <div class="welcome-flag" aria-hidden="true">🇵🇹</div>
@@ -239,11 +273,12 @@ const shapes = [
   [[1,1],[1,1]],
   [[1,1,1]],
   [[1,1,0],[0,1,1]],
-  [[1,1]]
+  [[1,1]],
+  [[1],[1],[1],[1]]
 ];
-const colors = ['#e3515f','#59ba84','#ffd36d','#eae0be','#72aac8','#e88851','#a7c975'];
-const symbols = ['🇵🇹','🚋','🐓','CR7','🐟','🥧','Twelve'];
-const symbolNames = ['Portugal','Tram de Lisbonne','Coq de Barcelos','CR7 · Futebol','Sardines','Pastel de nata','Twelve'];
+const colors = ['#e3515f','#59ba84','#ffd36d','#eae0be','#72aac8','#e88851','#a7c975','#50c8cc'];
+const symbols = ['🇵🇹','🚋','🐓','CR7','🐟','🥧','Twelve','✦'];
+const symbolNames = ['Portugal','Tram de Lisbonne','Coq de Barcelos','CR7 · Futebol','Sardines','Pastel de nata','Twelve','Azulejo · Barre de quatre'];
 const recordKey = 'blocos-maeva-record-v1';
 let best = 0;
 try { best = Number(localStorage.getItem(recordKey)) || 0; } catch {}
@@ -525,7 +560,7 @@ function action(name) {
   }
   if (name === 'rotate') {
     const shape = piece.shape[0].map((_,x) => piece.shape.map(row => row[x]).reverse());
-    for (const [dx,dy] of [[0,0],[-1,0],[1,0],[-2,0],[2,0],[0,-1],[0,-2]]) {
+    for (const [dx,dy] of [[0,0],[-1,0],[1,0],[-2,0],[2,0],[-3,0],[3,0],[0,-1],[0,-2],[0,-3]]) {
       if (fits(shape,piece.x+dx,piece.y+dy)) {
         piece = {...piece,shape,x:piece.x+dx,y:piece.y+dy};
         break;
@@ -549,9 +584,23 @@ function block(ctx,x,y,s,color,ghost=false) {
   ctx.globalAlpha = ghost ? .38 : 1;
   ctx.fillStyle = color;
   ctx.strokeStyle = color;
-  if (ghost) ctx.strokeRect(x+3,y+3,s-6,s-6);
+  if (ghost) {
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(x+3,y+3,s-6,s-6,Math.min(4,s*.14));
+    ctx.stroke();
+    ctx.lineWidth = 1;
+  }
   else {
-    ctx.fillRect(x+1,y+1,s-2,s-2);
+    ctx.beginPath();
+    ctx.roundRect(x+1.5,y+1.5,s-3,s-3,Math.min(5,s*.18));
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff38';
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff16';
+    ctx.beginPath();
+    ctx.roundRect(x+3,y+3,s-6,(s-6)*.45,Math.min(3,s*.1));
+    ctx.fill();
     // Motif de carreau peint sur chaque bloc.
     ctx.strokeStyle = '#ffffff36';
     ctx.beginPath();
@@ -591,7 +640,7 @@ function block(ctx,x,y,s,color,ghost=false) {
 function draw() {
   board.clearRect(0,0,252,504);
   grid.forEach((row,y) => row.forEach((color,x) => {
-    board.fillStyle = (x+y)%2 ? '#13231d' : '#162920';
+    board.fillStyle = (x+y)%2 ? '#0c222a' : '#10272e';
     board.fillRect(x*size,y*size,size,size);
     if (color) block(board,x*size,y*size,size,color);
   }));
@@ -618,7 +667,8 @@ function draw() {
   board.globalAlpha = 1;
   preview.clearRect(0,0,90,60);
   if (upcoming !== undefined && state !== 'ended') {
-    const shape = shapes[upcoming], s = 17;
+    const shape = shapes[upcoming];
+    const s = Math.min(17,52/shape.length,82/shape[0].length);
     eachCell(shape,(x,y) => block(preview,(90-shape[0].length*s)/2+x*s,(60-shape.length*s)/2+y*s,s,colors[upcoming]));
   }
 }
